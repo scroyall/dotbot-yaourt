@@ -45,7 +45,7 @@ class Yaourt(dotbot.Plugin):
                 pass
             else:
                 pass
-            result = self._install(pkg)
+            result = self._process_package(pkg)
             results[result] = results.get(result, 0) + 1
             if result not in successful:
                 self._log.error("Could not install package '{}'".format(pkg))
@@ -63,13 +63,26 @@ class Yaourt(dotbot.Plugin):
 
         return success
 
+    def _is_already_installed(self, package):
+        query_command = 'yaourt --query {}'.format(package)
+        return_code = subprocess.call(query_command, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+
+        return (return_code == 0)
+
+    def _process_package(self, package):
+        if self._is_already_installed(package):
+            self._log.info("{} is already installed".format(package))
+            return PkgStatus.UP_TO_DATE
+        else:
+            return self._install(package)
+
     def _install(self, pkg):
         # to have a unified string which we can query
         # we need to execute the command with LANG=en_US.UTF-8
         cmd = 'LANG=en_US.UTF-8 yaourt --needed --noconfirm -S {}'.format(pkg)
 
         self._log.info("Installing \"{}\". Please wait...".format(pkg))
-        
+
         # needed to avoid conflicts due to locking
         time.sleep(1)
 
