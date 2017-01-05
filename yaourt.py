@@ -4,6 +4,7 @@ from enum import Enum
 class PkgStatus(Enum):
     # These names will be displayed
     UP_TO_DATE = 'Up to date'
+    ALREADY_INSTALLED = 'Already Installed'
     INSTALLED = 'Installed'
     NOT_FOUND = 'Not Found'
     ERROR = "Build Error"
@@ -35,7 +36,11 @@ class Yaourt(dotbot.Plugin):
     def _process(self, packages):
         defaults = self._context.defaults().get('yaourt', {})
         results = {}
-        successful = [PkgStatus.UP_TO_DATE, PkgStatus.INSTALLED]
+        successful = [
+                PkgStatus.UP_TO_DATE,
+                PkgStatus.INSTALLED,
+                PkgStatus.ALREADY_INSTALLED
+            ]
 
         for pkg in packages:
             if isinstance(pkg, dict):
@@ -72,7 +77,7 @@ class Yaourt(dotbot.Plugin):
     def _process_package(self, package):
         if self._is_already_installed(package):
             self._log.info("{} is already installed".format(package))
-            return PkgStatus.UP_TO_DATE
+            return PkgStatus.ALREADY_INSTALLED
         else:
             return self._install(package)
 
