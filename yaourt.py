@@ -88,13 +88,13 @@ class Yaourt(dotbot.Plugin):
 
         self._log.info("Installing \"{}\". Please wait...".format(pkg))
 
-        # needed to avoid conflicts due to locking
-        time.sleep(1)
-
         proc = subprocess.Popen(cmd, shell=True,
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         out = proc.stdout.read()
         proc.stdout.close()
+
+        # needed to avoid conflicts due to locking
+        time.sleep(1)
 
         for item in self._strings.keys():
             if out.decode("utf-8").find(self._strings[item]) >= 0:
